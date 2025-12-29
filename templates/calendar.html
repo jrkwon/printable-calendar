@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>달력 인쇄</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Google Fonts for better typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="no-print control-panel">
+        <form method="POST" id="calendarForm">
+            <div class="input-group">
+                <span>시작:</span>
+                <label>연도 <input type="number" name="start_year" id="start_year" value="{{ start_year }}"></label>
+                <label>월 <input type="number" name="start_month" id="start_month" value="{{ start_month }}" min="1"
+                        max="12"></label>
+            </div>
+
+            <div class="input-group">
+                <span>종료:</span>
+                <label>연도 <input type="number" name="end_year" id="end_year" value="{{ end_year }}"></label>
+                <label>월 <input type="number" name="end_month" id="end_month" value="{{ end_month }}" min="1"
+                        max="12"></label>
+            </div>
+
+            <div class="button-group">
+                <button type="submit">조회</button>
+                <button type="button" onclick="setOneYear()">1년치 설정</button>
+                <button type="button" class="print-btn" onclick="window.print()">인쇄하기</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="calendars-wrapper">
+        {% for cal in calendars %}
+        <div class="calendar-page">
+            <h1 class="calendar-title">{{ cal.year }}년 {{ cal.month }}월</h1>
+            <table class="calendar-table">
+                <thead>
+                    <tr>
+                        <th class="sunday">일</th>
+                        <th>월</th>
+                        <th>화</th>
+                        <th>수</th>
+                        <th>목</th>
+                        <th>금</th>
+                        <th class="saturday">토</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for week in cal.weeks %}
+                    <tr>
+                        {% for day in week %}
+                        {% if day %}
+                        {% set is_sunday = loop.index0 == 0 %}
+                        {% set is_saturday = loop.index0 == 6 %}
+                        {% set is_holiday = day['is_holiday'] %}
+                        <td class="{% if is_sunday or is_holiday %}sunday{% elif is_saturday %}saturday{% endif %}">
+                            <div class="date-cell">
+                                <div class="top-row">
+                                    <span class="solar-date">{{ day['day'] }}</span>
+                                    {% if day['holiday_name'] %}
+                                    <span class="holiday-name">{{ day['holiday_name'] }}</span>
+                                    {% endif %}
+                                </div>
+                                <span class="lunar-date">{{ day['lunar'] }}</span>
+                            </div>
+                        </td>
+                        {% else %}
+                        <td class="empty"></td>
+                        {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- Page break except for the last item -->
+        {% if not loop.last %}
+        <div class="page-break"></div>
+        {% endif %}
+        {% endfor %}
+    </div>
+
+    <script>
+        function setOneYear() {
+            const currentYear = parseInt(document.getElementById('start_year').value);
+            // Set start to Jan of current year (or kept as is? User asked for "1 year")
+            // Usually means Jan-Dec of selected year, or 12 months from start.
+            // Let's assume Jan-Dec of the start_year for simplicity and common usage.
+
+            document.getElementById('start_month').value = 1;
+            document.getElementById('end_year').value = currentYear;
+            document.getElementById('end_month').value = 12;
+
+            // Auto submit? Or let user click? Let's auto submit for convenience
+            document.getElementById('calendarForm').submit();
+        }
+    </script>
+</body>
+
+</html>
