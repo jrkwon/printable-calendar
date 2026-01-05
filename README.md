@@ -40,7 +40,6 @@ venv\Scripts\activate
 ### 3. Install Dependencies
 ```bash
 python -m pip install -r requirements.txt
-#!/home/jaerock/Documents/workspaces-antigravity/printable-calendar/venv/bin/python3
 ```
 
 ## Usage
